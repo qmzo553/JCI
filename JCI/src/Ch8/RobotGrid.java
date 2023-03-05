@@ -1,40 +1,62 @@
 package Ch8;
 
+import java.awt.Point;
+import java.util.*;
+
 public final class RobotGrid {
 	
 	private RobotGrid() {
 		throw new AssertionError("Cannot be instantiated");
 	}
 	
-	public static int countPaths(int m, int n) {
-		if(m <= 0 || n <= 0) {
-			return -1;
+	public static boolean computePath(int m, int n, boolean[][] maze, Set<Point> path) {
+		if(path == null || maze == null) {
+			throw new IllegalArgumentException("Path and maze cannot be null");
 		}
 		
-		if(m == 1 || n == 1) {
-			return 1;
+		if(m < 0 || n < 0) {
+			return false;
 		}
 		
-		return countPaths(m - 1, n) + countPaths(m, n - 1);
+		if(maze[m][n]) {
+			return false;
+		}
+		
+		if(((m == 0) && (n == 0)) || computePath(m, n - 1, maze, path) || computePath(m - 1, n, maze, path)) {
+			path.add(new Point(m, n));
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
-	public static int countPathsBottomUp(int m, int n) {
-		if(m <= 1 || n <= 1) {
-			return -1;
+	public static boolean computePath(int m, int n, boolean[][] maze, Set<Point> path, Set<Point> visitFailed) {
+		if(path == null || maze == null || visitFailed == null) {
+			throw new IllegalArgumentException("Path, maze and visitFailed cannot be null");
 		}
 		
-		int[][] count = new int[m][n];
-		
-		for(int j = 0; j < n; j++) {
-			count[0][j] = 1;
+		if(m < 0 || n < 0) {
+			return false;
 		}
 		
-		for(int i = 1; i < m; i++) {
-			for(int j = 1; j < n; j++) {
-				count[i][j] = count[i - 1][j] + count[i][j - 1];
-			}
+		if(maze[m][n]) {
+			return false;
 		}
 		
-		return count[m - 1][n - 1];
+		Point cell = new Point(m, n);
+		
+		if(visitFailed.contains(cell)) {
+			return false;
+		}
+		
+		if(((m == 0) && (n == 0)) || computePath(m, n -1, maze, path, visitFailed) || computePath(m - 1, n, maze, path, visitFailed)) {
+			path.add(cell);
+			
+			return true;
+		}
+		
+		visitFailed.add(cell);
+		return false;
 	}
 }
